@@ -1,5 +1,5 @@
 /* tcp_syn_flood.c
- * written by adamalston and GiwbyAlbatross 2020 and 2026, respectively
+ * written by adamalston, edited by GiwbyAlbatross 2020 and 2026, respectively
  * usage: tcp_syn_flood TARGET_PORT TARGET_IP
  */
 
